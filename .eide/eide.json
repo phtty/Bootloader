@@ -7,7 +7,11 @@
   ],
   "virtualFolder": {
     "name": "<virtual_root>",
-    "files": [],
+    "files": [
+      {
+        "path": "startup_stm32h750xx.s"
+      }
+    ],
     "folders": [
       {
         "name": "Drivers",
@@ -393,6 +397,21 @@
               }
             ],
             "folders": []
+          },
+          {
+            "name": "BSP",
+            "files": [],
+            "folders": [
+              {
+                "name": "w25qxx",
+                "files": [
+                  {
+                    "path": "Drivers/BSP/w25qxx/w25qxx_qspi.c"
+                  }
+                ],
+                "folders": []
+              }
+            ]
           }
         ]
       }
@@ -451,7 +470,8 @@
           "Drivers/CMSIS/Device/ST/STM32H7xx/Include",
           "Drivers/CMSIS/Include",
           "Drivers/STM32H7xx_HAL_Driver/Inc",
-          "Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"
+          "Drivers/STM32H7xx_HAL_Driver/Inc/Legacy",
+          "Drivers/BSP/w25qxx"
         ],
         "libList": [],
         "defineList": [
@@ -475,18 +495,15 @@
             "optimization": "level-debug",
             "warnings": "all-warnings",
             "one-elf-section-per-function": true,
-            "one-elf-section-per-data": true,
-            "C_FLAGS": "",
-            "CXX_FLAGS": ""
+            "one-elf-section-per-data": true
           },
-          "asm-compiler": {
-            "ASM_FLAGS": ""
-          },
+          "asm-compiler": {},
           "linker": {
             "output-format": "elf",
             "remove-unused-input-sections": true,
-            "LD_FLAGS": "",
-            "LIB_FLAGS": "-lm"
+            "LD_FLAGS": "-Wl,-u_printf_float",
+            "LIB_FLAGS": "-lm",
+            "$toolName": "auto"
           }
         }
       }
