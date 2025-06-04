@@ -38,11 +38,11 @@ void MX_QUADSPI_Init(void)
 
 	/* USER CODE END QUADSPI_Init 1 */
 	hqspi.Instance				  = QUADSPI;
-	hqspi.Init.ClockPrescaler	  = 2 - 1; // 设置二分频，QSPI外设基频为100Mhz，二分频后为50Mhz
+	hqspi.Init.ClockPrescaler	  = 1 - 1; // 设置不分频，QSPI外设基频为100Mhz
 	hqspi.Init.FifoThreshold	  = 4;
 	hqspi.Init.SampleShifting	  = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
 	hqspi.Init.FlashSize		  = 23 - 1;
-	hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_3_CYCLE;
+	hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_6_CYCLE; // 手册要求tSHSL1 10ns，tSHSL2 50ns；这里取最高值50ns，考虑QSPI频率为100MHz，这里延时6个周期即60ns，大于50ns
 	hqspi.Init.ClockMode		  = QSPI_CLOCK_MODE_3;
 	hqspi.Init.FlashID			  = QSPI_FLASH_ID_1;
 	hqspi.Init.DualFlash		  = QSPI_DUALFLASH_DISABLE;
@@ -79,28 +79,28 @@ void HAL_QSPI_MspInit(QSPI_HandleTypeDef *qspiHandle)
 		GPIO_InitStruct.Pin		  = GPIO_PIN_2;
 		GPIO_InitStruct.Mode	  = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull	  = GPIO_NOPULL;
-		GPIO_InitStruct.Speed	  = GPIO_SPEED_FREQ_LOW;
+		GPIO_InitStruct.Speed	  = GPIO_SPEED_FREQ_VERY_HIGH;
 		GPIO_InitStruct.Alternate = GPIO_AF9_QUADSPI;
 		HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 		GPIO_InitStruct.Pin		  = GPIO_PIN_2;
 		GPIO_InitStruct.Mode	  = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull	  = GPIO_NOPULL;
-		GPIO_InitStruct.Speed	  = GPIO_SPEED_FREQ_LOW;
+		GPIO_InitStruct.Speed	  = GPIO_SPEED_FREQ_VERY_HIGH;
 		GPIO_InitStruct.Alternate = GPIO_AF9_QUADSPI;
 		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 		GPIO_InitStruct.Pin		  = GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13;
 		GPIO_InitStruct.Mode	  = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull	  = GPIO_NOPULL;
-		GPIO_InitStruct.Speed	  = GPIO_SPEED_FREQ_LOW;
+		GPIO_InitStruct.Speed	  = GPIO_SPEED_FREQ_VERY_HIGH;
 		GPIO_InitStruct.Alternate = GPIO_AF9_QUADSPI;
 		HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
 		GPIO_InitStruct.Pin		  = GPIO_PIN_6;
 		GPIO_InitStruct.Mode	  = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull	  = GPIO_NOPULL;
-		GPIO_InitStruct.Speed	  = GPIO_SPEED_FREQ_LOW;
+		GPIO_InitStruct.Speed	  = GPIO_SPEED_FREQ_VERY_HIGH;
 		GPIO_InitStruct.Alternate = GPIO_AF10_QUADSPI;
 		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 

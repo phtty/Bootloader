@@ -26,11 +26,12 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "w25qxx_qspi.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef void (*pFunction)(void);
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -46,7 +47,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+pFunction JumpToApplication;
+extern uint16_t w25qxx_ID;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,7 +61,39 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+// 用于判断app内有无程序
+uint8_t app_IsReady(uint32_t addr)
+{
+	uint32_t data;
 
+	W25qxx_Read((uint8_t *)&data, addr - QSPI_BASE, sizeof(data));
+
+	if ((data & 0x2FF80000) == 0x24000000)
+		return SUCCESS;
+	else if ((data & 0x2FF80000) == 0x20000000)
+		return SUCCESS;
+	else if ((data & 0x3FF80000) == 0x30000000)
+		return SUCCESS;
+	else if ((data & 0x3FF80000) == 0x00000000)
+		return SUCCESS;
+	else
+		return ERROR;
+}
+
+// 跳转至指定地址执行（永不返回）
+void app_Jump(uint32_t addr)
+{
+	pFunction JumpToApplication;
+	uint32_t JumpAddress;
+
+	/* Jump to user application */
+	JumpAddress		  = *(__IO uint32_t *)(addr + 4);
+	JumpToApplication = (pFunction)JumpAddress;
+
+	/* Initialize user application's Stack Pointer */
+	__set_MSP(*(__IO uint32_t *)addr);
+	JumpToApplication();
+}
 /* USER CODE END 0 */
 
 /**
@@ -100,7 +134,8 @@ int main(void)
 	MX_QUADSPI_Init();
 	MX_USART1_UART_Init();
 	/* USER CODE BEGIN 2 */
-
+	w25qxx_Init();
+	printf("deviceID: 0x%x\n", w25qxx_ID);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */

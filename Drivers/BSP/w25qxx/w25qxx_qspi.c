@@ -6,7 +6,9 @@ static uint32_t QSPI_ResetDevice(QSPI_HandleTypeDef *hqspi);
 static uint8_t QSPI_EnterQPI(QSPI_HandleTypeDef *hqspi);
 static uint32_t QSPI_AutoPollingMemReady(QSPI_HandleTypeDef *hqspi, uint32_t Timeout);
 static uint32_t QSPI_WriteEnable(QSPI_HandleTypeDef *hqspi);
+#ifdef ADDR_32Bits
 static uint32_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi);
+#endif // ADDR_32Bit
 
 static uint8_t QSPI_Send_CMD(QSPI_HandleTypeDef *hqspi, uint32_t instruction, uint32_t address, uint32_t addressSize, uint32_t dummyCycles,
 							 uint32_t instructionMode, uint32_t addressMode, uint32_t dataMode, uint32_t dataSize);
@@ -17,8 +19,8 @@ uint16_t w25qxx_ID;
 
 void w25qxx_Init(void)
 {
-	HAL_Delay(5);
-	MX_QUADSPI_Init();
+	// HAL_Delay(5);
+	// MX_QUADSPI_Init();
 	QSPI_ResetDevice(&hqspi);
 	HAL_Delay(0); // 1ms wait device stable
 	w25qxx_ID = w25qxx_GetID();
@@ -358,8 +360,8 @@ void W25qxx_Write(uint8_t *pBuffer, uint32_t WriteAddr, uint16_t NumByteToWrite)
 
 /**
  * @brief  Configure the QSPI in memory-mapped mode   QPI/SPI && DTR(DDR)/Normal Mode
- * @param  hqspi: QSPI handle
- * @param  DTRMode: w25qxx_DTRMode DTR mode ,w25qxx_NormalMode Normal mode
+ * @param  hqspi: 	QSPI handle
+ * @param  DTRMode:	w25qxx_DTRMode DTR mode ,w25qxx_NormalMode Normal mode
  * @retval QSPI memory status
  */
 static uint32_t QSPI_EnableMemoryMappedMode(QSPI_HandleTypeDef *hqspi, uint8_t DTRMode)
@@ -464,15 +466,15 @@ static uint32_t QSPI_ResetDevice(QSPI_HandleTypeDef *hqspi)
  *
  * @param   instruction		要发送的指令
  * @param   address			发送到的目的地址
- * @param   addressSize	发送到的目的地址大小
+ * @param   addressSize		发送到的目的地址大小
  * @param   dummyCycles		空指令周期数
- * @param   instructionMode		指令模式;
+ * @param   instructionMode	指令模式;
  * @param   addressMode		地址模式; QSPI_ADDRESS_NONE,QSPI_ADDRESS_1_LINE,QSPI_ADDRESS_2_LINES,QSPI_ADDRESS_4_LINES
  * @param   dataMode		数据模式; QSPI_DATA_NONE,QSPI_DATA_1_LINE,QSPI_DATA_2_LINES,QSPI_DATA_4_LINES
  * @param   dataSize        待传输的数据长度
  *
- * @return  uint8_t			w25qxx_OK:正常
- *                      w25qxx_ERROR:错误
+ * @retval  uint8_t			w25qxx_OK:正常
+ * 							w25qxx_ERROR:错误
  */
 static uint8_t QSPI_Send_CMD(QSPI_HandleTypeDef *hqspi, uint32_t instruction, uint32_t address, uint32_t addressSize, uint32_t dummyCycles,
 							 uint32_t instructionMode, uint32_t addressMode, uint32_t dataMode, uint32_t dataSize)
@@ -504,6 +506,7 @@ static uint8_t QSPI_Send_CMD(QSPI_HandleTypeDef *hqspi, uint32_t instruction, ui
 	return w25qxx_OK;
 }
 
+#ifdef ADDR_32Bits
 /**
  * @brief  This function set the QSPI memory in 4-byte address mode
  * @param  hqspi: QSPI handle
@@ -541,6 +544,7 @@ static uint32_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi)
 
 	return w25qxx_OK;
 }
+#endif // ADDR_32bit
 
 /**
  * @brief  This function send a Write Enable and wait it is effective.
