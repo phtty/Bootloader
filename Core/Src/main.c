@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "crc.h"
 #include "dma.h"
 #include "memorymap.h"
 #include "quadspi.h"
@@ -33,13 +34,21 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+typedef struct
+{
+	uint8_t Head;
+	uint8_t CMD;
+	uint16_t Lenth;
+	uint8_t data[1024];
+	uint16_t CRC_Code;
+	uint8_t Tail;
+} DataFrame;
 
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-uint8_t __attribute__((section(".DMARAM"))) USART1_Rx_buf[1024] = {0};
-uint8_t __attribute__((section(".DMARAM"))) USART1_Tx_buf[1024] = {0};
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,7 +60,10 @@ uint8_t __attribute__((section(".DMARAM"))) USART1_Tx_buf[1024] = {0};
 
 /* USER CODE BEGIN PV */
 extern uint16_t w25qxx_ID;
-RingBuffer usart1_fifo = {0};
+extern CRC_HandleTypeDef hcrc;
+RingBuffer usart1_fifo											= {0};
+uint8_t __attribute__((section(".DMARAM"))) USART1_Rx_buf[1024] = {0};
+uint8_t __attribute__((section(".DMARAM"))) USART1_Tx_buf[1024] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -113,9 +125,12 @@ int main(void)
 	MX_DMA_Init();
 	MX_USART1_UART_Init();
 	MX_QUADSPI_Init();
+	MX_CRC_Init();
 	/* USER CODE BEGIN 2 */
 	w25qxx_Init();
 	printf("deviceID: 0x%x\n", w25qxx_ID);
+
+	uint16_t temp = 0;
 
 	HAL_UARTEx_ReceiveToIdle_DMA(&huart1, USART1_Rx_buf, sizeof(USART1_Rx_buf));
 	/* USER CODE END 2 */
@@ -123,8 +138,12 @@ int main(void)
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
-		if (usart1_fifo.head != usart1_fifo.tail)
-			HAL_UART_Transmit(&huart1, USART1_Tx_buf, RB_GetByte_Bulk(&usart1_fifo, USART1_Tx_buf, RB_GetAvailable(&usart1_fifo)), 500);
+		if (usart1_fifo.head != usart1_fifo.tail) {
+			temp = RB_GetAvailable(&usart1_fifo);
+			HAL_UART_Transmit(&huart1, USART1_Tx_buf, RB_GetByte_Bulk(&usart1_fifo, USART1_Tx_buf, temp), 500);
+			putchar('\n');
+			printf("CRC: 0x%x\n", (uint16_t)HAL_CRC_Calculate(&hcrc, (uint32_t *)USART1_Tx_buf, temp));
+		}
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

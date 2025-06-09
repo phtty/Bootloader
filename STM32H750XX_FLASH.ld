@@ -196,12 +196,13 @@ SECTIONS
     . = ALIGN(8);
   } >DTCMRAM
 
-.DMARAM :
-{
-  . = ALIGN(4);
-  *(.DMARAM)
-  . = ALIGN(4);
-} >RAM AT> FLASH
+  /* 给DMA传输变量使用的区域，定义在AXI RAM区域，应当在MPU中关闭缓存策略并设置为共享 */
+  .DMARAM :
+  {
+    . = ALIGN(4);
+    *(.DMARAM)
+    . = ALIGN(4);
+  } >RAM AT> FLASH
 
 
 
