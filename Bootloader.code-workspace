@@ -25,7 +25,8 @@
             "editor.tabSize": 4,
             "editor.autoIndent": "advanced"
         },
-        "makefile.configureOnOpen": false
+        "makefile.configureOnOpen": false,
+        "cortex-debug.variableUseNaturalFormat": true
     },
     "extensions": {
         "recommendations": [

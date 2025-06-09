@@ -410,6 +410,15 @@
                   }
                 ],
                 "folders": []
+              },
+              {
+                "name": "RingBuffer",
+                "files": [
+                  {
+                    "path": "Drivers/BSP/RingBuffer/Ringbuffer.c"
+                  }
+                ],
+                "folders": []
               }
             ]
           }
@@ -471,7 +480,8 @@
           "Drivers/CMSIS/Include",
           "Drivers/STM32H7xx_HAL_Driver/Inc",
           "Drivers/STM32H7xx_HAL_Driver/Inc/Legacy",
-          "Drivers/BSP/w25qxx"
+          "Drivers/BSP/w25qxx",
+          "Drivers/BSP/RingBuffer"
         ],
         "libList": [],
         "defineList": [
@@ -485,13 +495,13 @@
           "beforeBuildTasks": [],
           "afterBuildTasks": [],
           "global": {
-            "$float-abi-type": "softfp",
+            "$float-abi-type": "hard",
             "output-debug-info": "enable",
             "misc-control": "--specs=nosys.specs --specs=nano.specs"
           },
           "c/cpp-compiler": {
-            "language-c": "c11",
-            "language-cpp": "c++11",
+            "language-c": "c17",
+            "language-cpp": "c++17",
             "optimization": "level-debug",
             "warnings": "all-warnings",
             "one-elf-section-per-function": true,

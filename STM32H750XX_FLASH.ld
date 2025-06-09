@@ -196,6 +196,13 @@ SECTIONS
     . = ALIGN(8);
   } >DTCMRAM
 
+.DMARAM :
+{
+  . = ALIGN(4);
+  *(.DMARAM)
+  . = ALIGN(4);
+} >RAM AT> FLASH
+
 
 
   /* Remove information from the standard libraries */

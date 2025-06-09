@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "memorymap.h"
 #include "quadspi.h"
 #include "usart.h"
@@ -27,16 +28,18 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "w25qxx_qspi.h"
+#include "RingBuffer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef void (*pFunction)(void);
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+uint8_t __attribute__((section(".DMARAM"))) USART1_Rx_buf[1024] = {0};
+uint8_t __attribute__((section(".DMARAM"))) USART1_Tx_buf[1024] = {0};
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -47,8 +50,8 @@ typedef void (*pFunction)(void);
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-pFunction JumpToApplication;
 extern uint16_t w25qxx_ID;
+RingBuffer usart1_fifo = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,39 +64,7 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// 用于判断app内有无程序
-uint8_t app_IsReady(uint32_t addr)
-{
-	uint32_t data;
 
-	W25qxx_Read((uint8_t *)&data, addr - QSPI_BASE, sizeof(data));
-
-	if ((data & 0x2FF80000) == 0x24000000)
-		return SUCCESS;
-	else if ((data & 0x2FF80000) == 0x20000000)
-		return SUCCESS;
-	else if ((data & 0x3FF80000) == 0x30000000)
-		return SUCCESS;
-	else if ((data & 0x3FF80000) == 0x00000000)
-		return SUCCESS;
-	else
-		return ERROR;
-}
-
-// 跳转至指定地址执行（永不返回）
-void app_Jump(uint32_t addr)
-{
-	pFunction JumpToApplication;
-	uint32_t JumpAddress;
-
-	/* Jump to user application */
-	JumpAddress		  = *(__IO uint32_t *)(addr + 4);
-	JumpToApplication = (pFunction)JumpAddress;
-
-	/* Initialize user application's Stack Pointer */
-	__set_MSP(*(__IO uint32_t *)addr);
-	JumpToApplication();
-}
 /* USER CODE END 0 */
 
 /**
@@ -109,6 +80,14 @@ int main(void)
 
 	/* MPU Configuration--------------------------------------------------------*/
 	MPU_Config();
+
+	/* Enable the CPU Cache */
+
+	/* Enable I-Cache---------------------------------------------------------*/
+	SCB_EnableICache();
+
+	/* Enable D-Cache---------------------------------------------------------*/
+	SCB_EnableDCache();
 
 	/* MCU Configuration--------------------------------------------------------*/
 
@@ -131,16 +110,21 @@ int main(void)
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
-	MX_QUADSPI_Init();
+	MX_DMA_Init();
 	MX_USART1_UART_Init();
+	MX_QUADSPI_Init();
 	/* USER CODE BEGIN 2 */
 	w25qxx_Init();
 	printf("deviceID: 0x%x\n", w25qxx_ID);
+
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart1, USART1_Rx_buf, sizeof(USART1_Rx_buf));
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
+		if (usart1_fifo.head != usart1_fifo.tail)
+			HAL_UART_Transmit(&huart1, USART1_Tx_buf, RB_GetByte_Bulk(&usart1_fifo, USART1_Tx_buf, RB_GetAvailable(&usart1_fifo)), 500);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -177,7 +161,7 @@ void SystemClock_Config(void)
 	RCC_OscInitStruct.PLL.PLLM		 = 5;
 	RCC_OscInitStruct.PLL.PLLN		 = 192;
 	RCC_OscInitStruct.PLL.PLLP		 = 2;
-	RCC_OscInitStruct.PLL.PLLQ		 = 8;
+	RCC_OscInitStruct.PLL.PLLQ		 = 2;
 	RCC_OscInitStruct.PLL.PLLR		 = 2;
 	RCC_OscInitStruct.PLL.PLLRGE	 = RCC_PLL1VCIRANGE_2;
 	RCC_OscInitStruct.PLL.PLLVCOSEL	 = RCC_PLL1VCOWIDE;
@@ -213,12 +197,12 @@ void PeriphCommonClock_Config(void)
 	/** Initializes the peripherals clock
 	 */
 	PeriphClkInitStruct.PeriphClockSelection  = RCC_PERIPHCLK_QSPI | RCC_PERIPHCLK_USART1;
-	PeriphClkInitStruct.PLL2.PLL2M			  = 8;
-	PeriphClkInitStruct.PLL2.PLL2N			  = 128;
+	PeriphClkInitStruct.PLL2.PLL2M			  = 25;
+	PeriphClkInitStruct.PLL2.PLL2N			  = 200;
 	PeriphClkInitStruct.PLL2.PLL2P			  = 2;
-	PeriphClkInitStruct.PLL2.PLL2Q			  = 25;
-	PeriphClkInitStruct.PLL2.PLL2R			  = 4;
-	PeriphClkInitStruct.PLL2.PLL2RGE		  = RCC_PLL2VCIRANGE_1;
+	PeriphClkInitStruct.PLL2.PLL2Q			  = 20;
+	PeriphClkInitStruct.PLL2.PLL2R			  = 2;
+	PeriphClkInitStruct.PLL2.PLL2RGE		  = RCC_PLL2VCIRANGE_0;
 	PeriphClkInitStruct.PLL2.PLL2VCOSEL		  = RCC_PLL2VCOWIDE;
 	PeriphClkInitStruct.PLL2.PLL2FRACN		  = 0;
 	PeriphClkInitStruct.QspiClockSelection	  = RCC_QSPICLKSOURCE_PLL2;
@@ -245,15 +229,27 @@ void MPU_Config(void)
 	 */
 	MPU_InitStruct.Enable			= MPU_REGION_ENABLE;
 	MPU_InitStruct.Number			= MPU_REGION_NUMBER0;
-	MPU_InitStruct.BaseAddress		= 0x0;
-	MPU_InitStruct.Size				= MPU_REGION_SIZE_4GB;
-	MPU_InitStruct.SubRegionDisable = 0x87;
+	MPU_InitStruct.BaseAddress		= 0x20000000;
+	MPU_InitStruct.Size				= MPU_REGION_SIZE_128KB;
+	MPU_InitStruct.SubRegionDisable = 0x0;
 	MPU_InitStruct.TypeExtField		= MPU_TEX_LEVEL0;
-	MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
-	MPU_InitStruct.DisableExec		= MPU_INSTRUCTION_ACCESS_DISABLE;
-	MPU_InitStruct.IsShareable		= MPU_ACCESS_SHAREABLE;
-	MPU_InitStruct.IsCacheable		= MPU_ACCESS_NOT_CACHEABLE;
-	MPU_InitStruct.IsBufferable		= MPU_ACCESS_NOT_BUFFERABLE;
+	MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+	MPU_InitStruct.DisableExec		= MPU_INSTRUCTION_ACCESS_ENABLE;
+	MPU_InitStruct.IsShareable		= MPU_ACCESS_NOT_SHAREABLE;
+	MPU_InitStruct.IsCacheable		= MPU_ACCESS_CACHEABLE;
+	MPU_InitStruct.IsBufferable		= MPU_ACCESS_BUFFERABLE;
+
+	HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
+	/** Initializes and configures the Region and the memory to be protected
+	 */
+	MPU_InitStruct.Number		= MPU_REGION_NUMBER1;
+	MPU_InitStruct.BaseAddress	= 0x24000000;
+	MPU_InitStruct.Size			= MPU_REGION_SIZE_512KB;
+	MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
+	MPU_InitStruct.IsShareable	= MPU_ACCESS_SHAREABLE;
+	MPU_InitStruct.IsCacheable	= MPU_ACCESS_NOT_CACHEABLE;
+	MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
 
 	HAL_MPU_ConfigRegion(&MPU_InitStruct);
 	/* Enables the MPU */

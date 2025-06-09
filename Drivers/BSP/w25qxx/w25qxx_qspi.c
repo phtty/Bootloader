@@ -6,9 +6,7 @@ static uint32_t QSPI_ResetDevice(QSPI_HandleTypeDef *hqspi);
 static uint8_t QSPI_EnterQPI(QSPI_HandleTypeDef *hqspi);
 static uint32_t QSPI_AutoPollingMemReady(QSPI_HandleTypeDef *hqspi, uint32_t Timeout);
 static uint32_t QSPI_WriteEnable(QSPI_HandleTypeDef *hqspi);
-#ifdef ADDR_32Bits
 static uint32_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi);
-#endif // ADDR_32Bit
 
 static uint8_t QSPI_Send_CMD(QSPI_HandleTypeDef *hqspi, uint32_t instruction, uint32_t address, uint32_t addressSize, uint32_t dummyCycles,
 							 uint32_t instructionMode, uint32_t addressMode, uint32_t dataMode, uint32_t dataSize);
@@ -506,13 +504,12 @@ static uint8_t QSPI_Send_CMD(QSPI_HandleTypeDef *hqspi, uint32_t instruction, ui
 	return w25qxx_OK;
 }
 
-#ifdef ADDR_32Bits
 /**
  * @brief  This function set the QSPI memory in 4-byte address mode
  * @param  hqspi: QSPI handle
  * @retval None
  */
-static uint32_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi)
+static __attribute__((unused)) uint32_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi)
 {
 	QSPI_CommandTypeDef s_command;
 
@@ -544,7 +541,6 @@ static uint32_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi)
 
 	return w25qxx_OK;
 }
-#endif // ADDR_32bit
 
 /**
  * @brief  This function send a Write Enable and wait it is effective.
