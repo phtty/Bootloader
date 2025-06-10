@@ -18,7 +18,14 @@
             "*.c++": "cpp",
             "*.cpp": "cpp",
             "*.cxx": "cpp",
-            "*.cc": "cpp"
+            "*.cc": "cpp",
+            "cstdlib": "c",
+            "memory_resource": "c",
+            "array": "c",
+            "string": "c",
+            "ranges": "c",
+            "span": "c",
+            "string_view": "c"
         },
         "[yaml]": {
             "editor.insertSpaces": true,
@@ -26,7 +33,8 @@
             "editor.autoIndent": "advanced"
         },
         "makefile.configureOnOpen": false,
-        "cortex-debug.variableUseNaturalFormat": true
+        "cortex-debug.variableUseNaturalFormat": true,
+        "commentTranslate.multiLineMerge": true
     },
     "extensions": {
         "recommendations": [

@@ -419,6 +419,15 @@
                   }
                 ],
                 "folders": []
+              },
+              {
+                "name": "GetFrame",
+                "files": [
+                  {
+                    "path": "Drivers/BSP/GetFrame/GetFrame.c"
+                  }
+                ],
+                "folders": []
               }
             ]
           }
@@ -481,7 +490,8 @@
           "Drivers/STM32H7xx_HAL_Driver/Inc",
           "Drivers/STM32H7xx_HAL_Driver/Inc/Legacy",
           "Drivers/BSP/w25qxx",
-          "Drivers/BSP/RingBuffer"
+          "Drivers/BSP/RingBuffer",
+          "Drivers/BSP/GetFrame"
         ],
         "libList": [],
         "defineList": [

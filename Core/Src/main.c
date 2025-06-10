@@ -34,15 +34,6 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef struct
-{
-	uint8_t Head;
-	uint8_t CMD;
-	uint16_t Lenth;
-	uint8_t data[1024];
-	uint16_t CRC_Code;
-	uint8_t Tail;
-} DataFrame;
 
 /* USER CODE END PTD */
 
@@ -138,7 +129,7 @@ int main(void)
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
-		if (usart1_fifo.head != usart1_fifo.tail) {
+		if (usart1_fifo.read_index != usart1_fifo.write_index) {
 			temp = RB_GetAvailable(&usart1_fifo);
 			HAL_UART_Transmit(&huart1, USART1_Tx_buf, RB_GetByte_Bulk(&usart1_fifo, USART1_Tx_buf, temp), 500);
 			putchar('\n');
