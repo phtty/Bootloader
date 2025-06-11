@@ -33,7 +33,7 @@
             "editor.autoIndent": "advanced"
         },
         "makefile.configureOnOpen": false,
-        "cortex-debug.variableUseNaturalFormat": true,
+        "cortex-debug.variableUseNaturalFormat": false,
         "commentTranslate.multiLineMerge": true
     },
     "extensions": {

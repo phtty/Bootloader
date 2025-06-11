@@ -61,6 +61,7 @@ extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
 extern RingBuffer usart1_fifo;
 extern uint8_t USART1_Rx_buf[1024];
+extern uint8_t global_flag;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -247,6 +248,8 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 		Rx_length = Size - Rx_buf_pos;
 
 		RB_PutByte_Bulk(&usart1_fifo, &USART1_Rx_buf[Rx_buf_pos], Rx_length); // 将dma缓冲区的内容copy到数据帧缓冲区处理
+		global_flag |= 0x01;												  // 置fifo数据更新标志位，在主循环中处理
+
 		Rx_buf_pos += Rx_length;
 		if (Rx_buf_pos >= 1024) // dma缓冲区越界后，将其归零
 			Rx_buf_pos = 0;

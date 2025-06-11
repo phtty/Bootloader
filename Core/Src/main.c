@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include "w25qxx_qspi.h"
 #include "RingBuffer.h"
+#include "GetFrame.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,8 +54,15 @@
 extern uint16_t w25qxx_ID;
 extern CRC_HandleTypeDef hcrc;
 RingBuffer usart1_fifo											= {0};
+DataFrame data_frame											= {0};
 uint8_t __attribute__((section(".DMARAM"))) USART1_Rx_buf[1024] = {0};
 uint8_t __attribute__((section(".DMARAM"))) USART1_Tx_buf[1024] = {0};
+/*
+bit0=1 环形缓冲区数据更新，需要处理
+bit1=1
+*/
+uint8_t global_flag = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -121,7 +129,7 @@ int main(void)
 	w25qxx_Init();
 	printf("deviceID: 0x%x\n", w25qxx_ID);
 
-	uint16_t temp = 0;
+	// uint16_t temp = 0;
 
 	HAL_UARTEx_ReceiveToIdle_DMA(&huart1, USART1_Rx_buf, sizeof(USART1_Rx_buf));
 	/* USER CODE END 2 */
@@ -129,15 +137,24 @@ int main(void)
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
-		if (usart1_fifo.read_index != usart1_fifo.write_index) {
-			temp = RB_GetAvailable(&usart1_fifo);
-			HAL_UART_Transmit(&huart1, USART1_Tx_buf, RB_GetByte_Bulk(&usart1_fifo, USART1_Tx_buf, temp), 500);
-			putchar('\n');
-			printf("CRC: 0x%x\n", (uint16_t)HAL_CRC_Calculate(&hcrc, (uint32_t *)USART1_Tx_buf, temp));
-		}
+		// if (usart1_fifo.read_index != usart1_fifo.write_index) {
+		// 	temp = RB_GetAvailable(&usart1_fifo);
+		// 	HAL_UART_Transmit(&huart1, USART1_Tx_buf, RB_GetByte_Bulk(&usart1_fifo, USART1_Tx_buf, temp), 500);
+		// 	putchar('\n');
+		// 	printf("CRC: 0x%x\n", (uint16_t)HAL_CRC_Calculate(&hcrc, (uint32_t *)USART1_Tx_buf, temp));
+		// }
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
+		if (global_flag & 0x01) {
+			if (GetDataFrame(&usart1_fifo, &data_frame)) { // 每次数据更新时解析一次数据
+				HAL_UART_Transmit(&huart1, data_frame.data, data_frame.lenth, 500);
+				putchar('\n');
+				printf("CRC: 0x%x\n", data_frame.CRC_code);
+			} else {
+				global_flag &= 0xfe; // 直到读不到完整数据帧时，清空环形缓冲区数据更新标志位
+			}
+		}
 	}
 	/* USER CODE END 3 */
 }
