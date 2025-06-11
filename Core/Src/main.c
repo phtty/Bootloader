@@ -40,7 +40,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define TEST_STRING "w25q64 qspi write&read test ok\n"
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -128,7 +128,9 @@ int main(void)
 	/* USER CODE BEGIN 2 */
 	w25qxx_Init();
 	printf("deviceID: 0x%x\n", w25qxx_ID);
-
+	W25qxx_Write((uint8_t *)TEST_STRING, 0x00, sizeof(TEST_STRING));
+	W25qxx_Read(USART1_Tx_buf, 0x00, sizeof(TEST_STRING));
+	HAL_UART_Transmit(&huart1, USART1_Tx_buf, sizeof(TEST_STRING), 500);
 	// uint16_t temp = 0;
 
 	HAL_UARTEx_ReceiveToIdle_DMA(&huart1, USART1_Rx_buf, sizeof(USART1_Rx_buf));
@@ -143,18 +145,19 @@ int main(void)
 		// 	putchar('\n');
 		// 	printf("CRC: 0x%x\n", (uint16_t)HAL_CRC_Calculate(&hcrc, (uint32_t *)USART1_Tx_buf, temp));
 		// }
+
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-		if (global_flag & 0x01) {
-			if (GetDataFrame(&usart1_fifo, &data_frame)) { // 每次数据更新时解析一次数据
-				HAL_UART_Transmit(&huart1, data_frame.data, data_frame.lenth, 500);
-				putchar('\n');
-				printf("CRC: 0x%x\n", data_frame.CRC_code);
-			} else {
-				global_flag &= 0xfe; // 直到读不到完整数据帧时，清空环形缓冲区数据更新标志位
-			}
-		}
+		// if (global_flag & 0x01) {
+		// 	if (GetDataFrame(&usart1_fifo, &data_frame)) { // 每次数据更新时解析一次数据
+		// 		HAL_UART_Transmit(&huart1, data_frame.data, data_frame.lenth, 500);
+		// 		putchar('\n');
+		// 		printf("CRC: 0x%x\n", data_frame.CRC_code);
+		// 	} else {
+		// 		global_flag &= 0xfe; // 直到读不到完整数据帧时，清空环形缓冲区数据更新标志位
+		// 	}
+		// }
 	}
 	/* USER CODE END 3 */
 }
@@ -227,7 +230,7 @@ void PeriphCommonClock_Config(void)
 	PeriphClkInitStruct.PLL2.PLL2M			  = 25;
 	PeriphClkInitStruct.PLL2.PLL2N			  = 200;
 	PeriphClkInitStruct.PLL2.PLL2P			  = 2;
-	PeriphClkInitStruct.PLL2.PLL2Q			  = 20;
+	PeriphClkInitStruct.PLL2.PLL2Q			  = 10;
 	PeriphClkInitStruct.PLL2.PLL2R			  = 2;
 	PeriphClkInitStruct.PLL2.PLL2RGE		  = RCC_PLL2VCIRANGE_0;
 	PeriphClkInitStruct.PLL2.PLL2VCOSEL		  = RCC_PLL2VCOWIDE;

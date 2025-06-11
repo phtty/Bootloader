@@ -46,9 +46,9 @@ int8_t SearchFrameHead(RingBuffer *fifo, uint16_t *offset)
 }
 
 /**
- * @brief 检查数据帧是否完整，并给出数据帧长度
+ * @brief 检查数据帧是否完整，并给出数据部分长度
  *
- * @param fifo 环形缓冲区句柄
+ * @param fifo 环形缓冲区句柄指针
  * @param lenth 数据部分长度指针
  * @retval -1 环形缓冲区操作异常
  * @retval 0 帧数据异常
@@ -95,8 +95,8 @@ uint8_t Data_CRC(uint8_t *data, uint16_t lenth, uint16_t frame_crc)
 /**
  * @brief 从环形缓冲区中解析数据帧
  *
- * @param fifo 环形缓冲区句柄
- * @param frame 数据帧句柄
+ * @param fifo 环形缓冲区句柄指针
+ * @param frame 数据帧句柄指针
  * @retval 0 解析失败
  * @retval 1 解析成功
  */

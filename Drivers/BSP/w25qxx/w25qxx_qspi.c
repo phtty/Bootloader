@@ -222,11 +222,16 @@ uint8_t W25qxx_PageProgram(uint8_t *pData, uint32_t WriteAddr, uint32_t Size)
 	return result;
 }
 
-// 读取SPI FLASH,仅支持QPI模式
-// 在指定地址开始读取指定长度的数据
-// pBuffer:数据存储区
-// ReadAddr:开始读取的地址(最大32bit)
-// NumByteToRead:要读取的字节数(最大65535)
+/**
+ * @brief 在指定地址开始读取指定长度的数据
+ *
+ * @param pData 数据存储区
+ * @param ReadAddr 开始读取的地址(最大32bit)
+ * @param Size 要读取的字节数(最大65535)
+ * @return w25qxx_StatusTypeDef
+ *
+ * @note 仅支持QPI模式
+ */
 uint8_t W25qxx_Read(uint8_t *pData, uint32_t ReadAddr, uint32_t Size)
 {
 	uint8_t result;
@@ -269,14 +274,16 @@ uint8_t W25qxx_Read(uint8_t *pData, uint32_t ReadAddr, uint32_t Size)
 	return result;
 }
 
-// 无检验写SPI FLASH
-// 必须确保所写的地址范围内的数据全部为0XFF,否则在非0XFF处写入的数据将失败!
-// 具有自动换页功能
-// 在指定地址开始写入指定长度的数据,但是要确保地址不越界!
-// pBuffer:数据存储区
-// WriteAddr:开始写入的地址(最大32bit)
-// NumByteToWrite:要写入的字节数(最大65535)
-// CHECK OK
+/**
+ * @brief 在指定地址开始写入指定长度的数据
+ *
+ * @param pBuffer 数据存储区
+ * @param WriteAddr 开始写入的地址(最大32bit)
+ * @param NumByteToWrite 要写入的字节数(最大65535)
+ *
+ * @note 具有自动换页功能
+ * @note 必须确保所写的地址范围内的数据全部为0XFF,否则在非0XFF处写入的数据将失败!
+ */
 void W25qxx_WriteNoCheck(uint8_t *pBuffer, uint32_t WriteAddr, uint32_t NumByteToWrite)
 {
 	uint16_t pageremain;
@@ -302,12 +309,15 @@ void W25qxx_WriteNoCheck(uint8_t *pBuffer, uint32_t WriteAddr, uint32_t NumByteT
 	}
 }
 
-// 写SPI FLASH
-// 在指定地址开始写入指定长度的数据
-// 该函数带擦除操作!
-// pBuffer:数据存储区
-// WriteAddr:开始写入的地址(最大32bit)
-// NumByteToWrite:要写入的字节数(最大65535)
+/**
+ * @brief 在指定地址开始写入指定长度的数据
+ *
+ * @param pBuffer 数据存储区
+ * @param WriteAddr 开始写入的地址(最大32bit)
+ * @param NumByteToWrite 要写入的字节数(最大65535)
+ *
+ * @note 该函数带擦除操作!
+ */
 void W25qxx_Write(uint8_t *pBuffer, uint32_t WriteAddr, uint16_t NumByteToWrite)
 {
 	uint32_t secpos;
