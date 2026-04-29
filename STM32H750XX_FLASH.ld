@@ -106,6 +106,20 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  .initcall :
+  {
+    . = ALIGN(4);
+    PROVIDE(__initcall_start = .);
+    KEEP(*(SORT(.initcall.0)))
+    KEEP(*(SORT(.initcall.1)))
+    KEEP(*(SORT(.initcall.2)))
+    KEEP(*(SORT(.initcall.3)))
+    KEEP(*(SORT(.initcall.4)))
+    KEEP(*(SORT(.initcall.5)))
+    PROVIDE(__initcall_end = .);
+    . = ALIGN(4);
+  } >FLASH
+
   .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     . = ALIGN(4);

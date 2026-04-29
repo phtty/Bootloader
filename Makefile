@@ -37,13 +37,23 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 Core/Src/main.c \
-Core/Src/gpio.c \
-Core/Src/dma.c \
-Core/Src/memorymap.c \
-Core/Src/quadspi.c \
-Core/Src/usart.c \
 Core/Src/stm32h7xx_it.c \
 Core/Src/stm32h7xx_hal_msp.c \
+Core/Src/syscalls.c \
+Core/Src/sysmem.c \
+Core/Src/system_stm32h7xx.c \
+Platform/Src/pl_mpu.c \
+Platform/Src/pl_clock.c \
+Platform/Src/pl_gpio.c \
+Platform/Src/pl_dma.c \
+Platform/Src/pl_qspi.c \
+Platform/Src/pl_uart.c \
+Kernel/Src/initcall.c \
+Application/Src/app_bootloader.c \
+Application/Src/app_protocol.c \
+Application/Src/app_firmware.c \
+Device/Src/dev_qspi_flash.c \
+Device/Src/dev_console.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c \
@@ -64,7 +74,6 @@ Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_qspi.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_delayblock.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c \
-Core/Src/system_stm32h7xx.c  
 
 # ASM sources
 ASM_SOURCES =  \
@@ -126,6 +135,10 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -ICore/Inc \
+-IPlatform/Inc \
+-IKernel/Inc \
+-IApplication/Inc \
+-IDevice/Inc \
 -IDrivers/STM32H7xx_HAL_Driver/Inc \
 -IDrivers/STM32H7xx_HAL_Driver/Inc/Legacy \
 -IDrivers/CMSIS/Device/ST/STM32H7xx/Include \
