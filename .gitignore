@@ -10,6 +10,9 @@
 /obj
 /out
 
+# eide auto-generated (source of truth is eide.yml)
+/.eide/eide.json
+
 # eide template
 *.ept
 *.eide-template
