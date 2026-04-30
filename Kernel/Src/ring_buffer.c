@@ -33,12 +33,24 @@ bool rb_put_byte(ring_buffer_t *rb, uint8_t byte)
 
 uint16_t rb_put_bytes(ring_buffer_t *rb, const uint8_t *data, uint16_t len)
 {
-    uint16_t i;
-    for (i = 0; i < len; i++) {
-        if (!rb_put_byte(rb, data[i]))
-            break;
+    uint16_t free = rb_get_free_space(rb);
+    if (len > free)
+        len = free;
+    if (len == 0)
+        return 0;
+
+    uint16_t start      = rb->write_index;
+    uint16_t contiguous = RING_BUFFER_SIZE - start;
+
+    if (len <= contiguous) {
+        memcpy(&rb->data[start], data, len);
+    } else {
+        memcpy(&rb->data[start], data, contiguous);
+        memcpy(rb->data, data + contiguous, len - contiguous);
     }
-    return i;
+
+    rb->write_index = (start + len) % RING_BUFFER_SIZE;
+    return len;
 }
 
 bool rb_get_byte(ring_buffer_t *rb, uint8_t *byte)
@@ -53,12 +65,24 @@ bool rb_get_byte(ring_buffer_t *rb, uint8_t *byte)
 
 uint16_t rb_get_bytes(ring_buffer_t *rb, uint8_t *data, uint16_t len)
 {
-    uint16_t i;
-    for (i = 0; i < len; i++) {
-        if (!rb_get_byte(rb, &data[i]))
-            break;
+    uint16_t avail = rb_get_available(rb);
+    if (len > avail)
+        len = avail;
+    if (len == 0)
+        return 0;
+
+    uint16_t start      = rb->read_index;
+    uint16_t contiguous = RING_BUFFER_SIZE - start;
+
+    if (len <= contiguous) {
+        memcpy(data, &rb->data[start], len);
+    } else {
+        memcpy(data, &rb->data[start], contiguous);
+        memcpy(data + contiguous, rb->data, len - contiguous);
     }
-    return i;
+
+    rb->read_index = (start + len) % RING_BUFFER_SIZE;
+    return len;
 }
 
 bool rb_peek_byte(const ring_buffer_t *rb, uint16_t offset, uint8_t *byte)
