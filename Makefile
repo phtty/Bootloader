@@ -74,7 +74,7 @@ Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_qspi.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_delayblock.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c \
-Core/Src/crc.c \
+Platform/Src/pl_crc.c \
 Platform/Src/pl_rtc.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_crc.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_crc_ex.c \

@@ -43,14 +43,4 @@ bool app_fw_validate_image(const uint8_t *data, size_t size, uint32_t expected_c
 int32_t app_fw_write_data(firmware_ctx_t *ctx, const uint8_t *data, size_t len);
 void app_fw_jump_to_app(uint32_t entry_addr);
 
-/*
- * TODO: 替换为 STM32H7 硬件 CRC 单元（CRC peripheral）
- *
- * H7 的硬件 CRC 单元支持：
- *   - 8/16/32 位多项式，默认使用 Ethernet 多项式 (0x04C11DB7)
- *   - DMA 联动可实现零 CPU 开销的流式校验
- *   - HAL 接口: HAL_CRC_Calculate() / HAL_CRC_Accumulate()
- *
- * 当前为软件查表实现，后续切换到硬件 CRC 后可删除 CRC 查表代码。
- */
 uint32_t app_fw_crc32(uint32_t crc, const uint8_t *buf, size_t len);
