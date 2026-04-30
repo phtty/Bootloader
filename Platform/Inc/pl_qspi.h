@@ -36,6 +36,27 @@ typedef struct {
     uint32_t      alt_bytes;     /* 交替字节（极少数命令需要，通常为 0） */
 } pl_qspi_command_t;
 
+/**
+ * @brief Memory-mapped 模式的读取命令配置
+ *
+ * QSPI 进入 memory-mapped 模式后，任何对 0x90000000 的 AHB 读访问
+ * 都会自动触发 QSPI Flash 的读取命令。因此必须选择一个"快速读取"命令
+ * 来保证 XIP (eXecute In Place) 的性能和可靠性。
+ *
+ * 常用配置（取决于 Flash 芯片型号和 QE 位是否使能）：
+ *   - 标准 Fast Read:        0x0B, 1-1-1, 8 dummy
+ *   - Quad Output Fast Read: 0x6B, 1-1-4, 8 dummy (需要 QE=1)
+ *   - Quad I/O Fast Read:    0xEB, 1-4-4, 4 dummy (需要 QE=1, 性能最优)
+ */
+typedef struct {
+    uint8_t        instruction;
+    pl_qspi_mode_t instr_mode;
+    pl_qspi_mode_t addr_mode;
+    pl_qspi_mode_t data_mode;
+    uint32_t       addr_size;
+    uint32_t       dummy_cycles;
+} pl_qspi_mmap_cfg_t;
+
 /* ---- 平台层对外接口 ---- */
 
 void      pl_qspi_init(void);
@@ -47,8 +68,8 @@ int32_t   pl_qspi_read(pl_qspi_handle_t handle, pl_qspi_command_t *cmd, uint8_t 
 int32_t   pl_qspi_write(pl_qspi_handle_t handle, pl_qspi_command_t *cmd, const uint8_t *buf, size_t len);
 /* 仅发送命令（无数据阶段），如写使能、擦除指令 */
 int32_t   pl_qspi_send_cmd(pl_qspi_handle_t handle, pl_qspi_command_t *cmd);
-/* 将 QSPI Flash 映射到内存空间（0x90000000），之后可直接通过指针访问 */
-int32_t   pl_qspi_memory_mapped(pl_qspi_handle_t handle);
+/* 将 QSPI Flash 映射到内存空间（0x90000000），使用指定的读取命令配置 */
+int32_t   pl_qspi_memory_mapped(pl_qspi_handle_t handle, const pl_qspi_mmap_cfg_t *cfg);
 /* 读取 QSPI 外设状态寄存器 */
 int32_t   pl_qspi_get_status(pl_qspi_handle_t handle);
 /* 中止正在进行的 QSPI 传输 */

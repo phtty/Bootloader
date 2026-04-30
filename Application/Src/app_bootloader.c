@@ -10,19 +10,19 @@
  */
 void app_bootloader_run(void)
 {
-    proto_frame_t frame;
+	proto_frame_t frame;
 
-    /* 初始化协议栈（注册 DMA 回调，启动接收） */
-    app_protocol_init();
+	/* 初始化协议栈（注册 DMA 回调，启动接收） */
+	app_protocol_init();
 
-    dev_console_puts("Bootloader ready.\r\n");
+	dev_console_puts("Bootloader ready.\r\n");
 
-    for (;;) {
-        /* 阻塞等待一帧完整数据 */
-        if (proto_recv_frame(&frame, 0) != 0)
-            continue;
+	for (;;) {
+		/* 阻塞等待一帧完整数据 */
+		if (proto_recv_frame(&frame, 0) != 0)
+			continue;
 
-        /* 分发到协议处理 */
-        proto_handle_frame(&frame);
-    }
+		/* 分发到协议处理 */
+		proto_handle_frame(&frame);
+	}
 }

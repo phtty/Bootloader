@@ -86,19 +86,21 @@ int32_t pl_qspi_send_cmd(pl_qspi_handle_t handle, pl_qspi_command_t *cmd)
     return 0;
 }
 
-int32_t pl_qspi_memory_mapped(pl_qspi_handle_t handle)
+int32_t pl_qspi_memory_mapped(pl_qspi_handle_t handle, const pl_qspi_mmap_cfg_t *cfg)
 {
     QSPI_HandleTypeDef *h = (QSPI_HandleTypeDef *)handle;
     QSPI_CommandTypeDef hal_cmd = {0};
     QSPI_MemoryMappedTypeDef mem_cfg = {0};
 
-    /* 使用 SPI 1-1-1 模式做内存映射读取 */
-    hal_cmd.Instruction     = 0x03;
-    hal_cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    hal_cmd.AddressMode     = QSPI_ADDRESS_1_LINE;
-    hal_cmd.DataMode        = QSPI_DATA_1_LINE;
-    hal_cmd.AddressSize     = QSPI_ADDRESS_24_BITS;
-    hal_cmd.DummyCycles     = 0;
+    if (!cfg)
+        return -1;
+
+    hal_cmd.Instruction     = cfg->instruction;
+    hal_cmd.InstructionMode = map_qspi_mode(cfg->instr_mode);
+    hal_cmd.AddressMode     = map_qspi_mode(cfg->addr_mode);
+    hal_cmd.DataMode        = map_qspi_mode(cfg->data_mode);
+    hal_cmd.AddressSize     = cfg->addr_size;
+    hal_cmd.DummyCycles     = cfg->dummy_cycles;
     hal_cmd.DdrMode         = QSPI_DDR_MODE_DISABLE;
 
     mem_cfg.TimeOutActivation = QSPI_TIMEOUT_COUNTER_DISABLE;

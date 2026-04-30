@@ -67,6 +67,11 @@ targets:
       - <virtual_root>/Core/Src/quadspi.c
       - <virtual_root>/Core/Src/usart.c
       - <virtual_root>/Core/Src/memorymap.c
+      - Core/Src/gpio.c
+      - Core/Src/quadspi.c
+      - Core/Src/usart.c
+      - Core/Src/dma.c
+      - Core/Src/memorymap.c
     settings:
       debugger: cortex-debug
     toolchain: GCC
@@ -96,9 +101,7 @@ targets:
             arm-thumb-interwork: true
             arm-thumb-mode: thumb
             misc-control: --specs=nosys.specs --specs=nano.specs
-            not-use-syscalls: true
             output-debug-info: enable
-            use-newlib-nano: true
           linker:
             $toolName: auto
             LIB_FLAGS: -lm -lc -lnosys
