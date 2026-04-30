@@ -1,3 +1,16 @@
+/**
+ * @file        app_protocol.h
+ * @brief       Bootloader 通信协议定义与帧收发 API
+ *
+ * 协议帧格式（大端序）：
+ * ```
+ *   SOF    CMD    LEN(2B)    Payload(0..256B)    CRC16(2B)
+ *   0xAA   1B     big-endian                    big-endian
+ * ```
+ *
+ * CRC-16-CCITT (poly=0x1021, init=0xFFFF)，由硬件 CRC 外设计算。
+ */
+
 #pragma once
 
 #include <stdint.h>
@@ -26,7 +39,7 @@ typedef enum {
     PROTO_ACK_INVALID = 0x84,  /**< 无效命令 / 参数 */
 } proto_cmd_t;
 
-/* ---- 帧结构（Packed，禁止编译器填充）---- */
+/* ---- 帧结构（packed，禁止编译器填充）---- */
 typedef struct __attribute__((packed)) {
     uint8_t  sof;                          /**< 帧起始标志，固定 0xAA */
     uint8_t  cmd;                          /**< 命令码 / ACK 码 */
@@ -35,7 +48,7 @@ typedef struct __attribute__((packed)) {
     uint16_t crc16;                        /**< CRC16 校验值（大端序） */
 } proto_frame_t;
 
-/* ---- 固件数据块描述 ---- */
+/** @brief 固件数据块描述（WRITE 命令的载荷格式） */
 typedef struct __attribute__((packed)) {
     uint32_t flash_addr;     /**< 目标写入地址（QSPI Flash 偏移） */
     uint16_t data_len;       /**< 数据长度 */
@@ -45,31 +58,44 @@ typedef struct __attribute__((packed)) {
 /* ---- API ---- */
 
 /**
- * @brief 协议栈初始化
+ * @brief   协议栈初始化
+ *
+ * 注册 DMA 接收回调并启动首次 DMA 空闲中断接收。
  */
 void app_protocol_init(void);
 
 /**
- * @brief 等待并接收一帧数据（阻塞）
- * @param frame  [out] 接收到的帧
- * @param timeout_ms  超时时间（毫秒）
- * @return 成功返回 0，超时返回 -1，格式错误返回 -2
+ * @brief   等待并接收一帧数据（阻塞）
+ * @param   frame      [out] 接收到的帧
+ * @param   timeout_ms 超时时间（毫秒，0 表示无限等待）
+ * @retval  0  成功
+ * @retval -1  超时
+ * @retval -2  帧格式错误（SOF/长度/CRC 不匹配）
  */
 int32_t proto_recv_frame(proto_frame_t *frame, uint32_t timeout_ms);
 
 /**
- * @brief 发送 ACK 帧
- * @param cmd      对应的命令码
- * @param ack_code ACK 状态码
- * @param data     附加数据（可为 NULL）
- * @param len      附加数据长度
- * @return 成功返回 0，失败返回 -1
+ * @brief   发送 ACK 帧
+ * @param   cmd      对应的命令码
+ * @param   ack_code ACK 状态码
+ * @param   data     附加数据（可为 NULL）
+ * @param   len      附加数据长度
+ * @return  成功返回发送字节数，失败返回 -1
  */
 int32_t proto_send_ack(uint8_t cmd, uint8_t ack_code, const uint8_t *data, uint16_t len);
 
 /**
- * @brief 处理接收到的帧（Bootloader 协议状态机核心）
- * @param frame  接收到的帧
- * @return 成功返回 0，失败返回 -1
+ * @brief   Bootloader 协议状态机（帧分发）
+ *
+ * 根据帧命令码分发到对应处理逻辑：
+ * - SYNC   → 返回 Flash 设备信息
+ * - ERASE  → 擦除指定扇区
+ * - WRITE  → 写入固件数据块
+ * - VERIFY → 校验写入完整性
+ * - LAUNCH → 跳转到应用程序
+ *
+ * @param   frame 接收到的帧
+ * @retval  0 成功
+ * @retval -1 处理失败
  */
 int32_t proto_handle_frame(proto_frame_t *frame);

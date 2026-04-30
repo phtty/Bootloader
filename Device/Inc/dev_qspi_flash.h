@@ -1,3 +1,12 @@
+/**
+ * @file        dev_qspi_flash.h
+ * @brief       QSPI Flash 设备驱动抽象层
+ *
+ * 提供类 Linux file_operations 的 ops 表驱动框架，
+ * 上层通过 dev_flash_read/write/erase 等便捷函数操作 Flash，
+ * 无需关心芯片型号差异。
+ */
+
 #pragma once
 
 #include <stdint.h>

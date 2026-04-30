@@ -1,3 +1,11 @@
+/**
+ * @file        dev_console.h
+ * @brief       控制台设备驱动（UART DMA 空闲中断收发）
+ *
+ * 封装 USART1 DMA 收发，提供字符/字符串/二进制数据的
+ * 阻塞和非阻塞接口。支持 DMA 空闲中断自动帧定界。
+ */
+
 #pragma once
 
 #include <stdint.h>
@@ -5,6 +13,8 @@
 
 /**
  * @brief 控制台 DMA 接收回调类型
+ *
+ * 在 ISR 上下文中被调用，需尽快返回。
  * @param data  接收到的数据指针
  * @param len   数据长度（字节）
  */
