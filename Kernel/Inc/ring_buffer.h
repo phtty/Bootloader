@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-/* 缓冲区容量，必须是 2 的幂（便于索引回绕时用位与替代取模） */
+/* 环形缓冲区容量（不再限制为 2 的幂，内部使用取模运算） */
 #define RING_BUFFER_SIZE 2048
 
 typedef struct {

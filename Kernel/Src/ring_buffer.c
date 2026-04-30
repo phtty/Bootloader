@@ -8,12 +8,12 @@ bool rb_is_empty(const ring_buffer_t *rb)
 
 bool rb_is_full(const ring_buffer_t *rb)
 {
-    return ((rb->write_index + 1) & (RING_BUFFER_SIZE - 1)) == rb->read_index;
+    return ((rb->write_index + 1) % RING_BUFFER_SIZE) == rb->read_index;
 }
 
 uint16_t rb_get_available(const ring_buffer_t *rb)
 {
-    return (rb->write_index - rb->read_index) & (RING_BUFFER_SIZE - 1);
+    return (rb->write_index - rb->read_index) % RING_BUFFER_SIZE;
 }
 
 uint16_t rb_get_free_space(const ring_buffer_t *rb)
@@ -27,7 +27,7 @@ bool rb_put_byte(ring_buffer_t *rb, uint8_t byte)
         return false;
 
     rb->data[rb->write_index] = byte;
-    rb->write_index           = (rb->write_index + 1) & (RING_BUFFER_SIZE - 1);
+    rb->write_index           = (rb->write_index + 1) % RING_BUFFER_SIZE;
     return true;
 }
 
@@ -47,7 +47,7 @@ bool rb_get_byte(ring_buffer_t *rb, uint8_t *byte)
         return false;
 
     *byte          = rb->data[rb->read_index];
-    rb->read_index = (rb->read_index + 1) & (RING_BUFFER_SIZE - 1);
+    rb->read_index = (rb->read_index + 1) % RING_BUFFER_SIZE;
     return true;
 }
 
@@ -67,7 +67,7 @@ bool rb_peek_byte(const ring_buffer_t *rb, uint16_t offset, uint8_t *byte)
     if (offset >= avail)
         return false;
 
-    uint16_t index = (rb->read_index + offset) & (RING_BUFFER_SIZE - 1);
+    uint16_t index = (rb->read_index + offset) % RING_BUFFER_SIZE;
     *byte          = rb->data[index];
     return true;
 }
@@ -80,7 +80,7 @@ uint16_t rb_peek_block(const ring_buffer_t *rb, uint16_t offset, uint8_t *dest, 
     if (len > avail - offset)
         len = avail - offset;
 
-    uint16_t start      = (rb->read_index + offset) & (RING_BUFFER_SIZE - 1);
+    uint16_t start      = (rb->read_index + offset) % RING_BUFFER_SIZE;
     uint16_t contiguous = RING_BUFFER_SIZE - start;
 
     if (len <= contiguous) {
@@ -98,7 +98,7 @@ uint16_t rb_get_contiguous_length(const ring_buffer_t *rb, uint16_t offset)
     if (offset >= avail)
         return 0;
 
-    uint16_t start      = (rb->read_index + offset) & (RING_BUFFER_SIZE - 1);
+    uint16_t start      = (rb->read_index + offset) % RING_BUFFER_SIZE;
     uint16_t contiguous = RING_BUFFER_SIZE - start;
     uint16_t remaining  = avail - offset;
 
@@ -111,6 +111,6 @@ uint16_t rb_skip_bytes(ring_buffer_t *rb, uint16_t len)
     if (len > avail)
         len = avail;
 
-    rb->read_index = (rb->read_index + len) & (RING_BUFFER_SIZE - 1);
+    rb->read_index = (rb->read_index + len) % RING_BUFFER_SIZE;
     return len;
 }
