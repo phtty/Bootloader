@@ -49,6 +49,7 @@ Platform/Src/pl_dma.c \
 Platform/Src/pl_qspi.c \
 Platform/Src/pl_uart.c \
 Kernel/Src/initcall.c \
+Kernel/Src/ring_buffer.c \
 Application/Src/app_bootloader.c \
 Application/Src/app_protocol.c \
 Application/Src/app_firmware.c \

@@ -122,9 +122,36 @@ static bool flash_enable_quad(qspi_flash_dev_t *dev)
     return (sr2 & QSPI_SR2_QE_BIT) != 0;
 }
 
+static int32_t flash_reset_device(qspi_flash_dev_t *dev)
+{
+    pl_qspi_command_t cmd = {
+        .instr_mode   = PL_QSPI_MODE_SPI,
+        .addr_size    = 0,
+        .dummy_cycles = 0,
+    };
+
+    /* SPI 模式下发送 Reset Enable + Reset Device（确保从任意状态恢复） */
+    cmd.instruction = QSPI_CMD_RESET_ENABLE;
+    pl_qspi_send_cmd(dev->pl_handle, &cmd);
+    cmd.instruction = QSPI_CMD_RESET_DEVICE;
+    pl_qspi_send_cmd(dev->pl_handle, &cmd);
+
+    /* 若 Flash 卡在 QPI 模式，用 4 线方式再发一次 Reset */
+    cmd.instr_mode  = PL_QSPI_MODE_QUAD;
+    cmd.instruction = QSPI_CMD_RESET_ENABLE;
+    pl_qspi_send_cmd(dev->pl_handle, &cmd);
+    cmd.instruction = QSPI_CMD_RESET_DEVICE;
+    pl_qspi_send_cmd(dev->pl_handle, &cmd);
+
+    return 0;
+}
+
 static int32_t qspi_flash_init(void *device)
 {
     qspi_flash_dev_t *dev = (qspi_flash_dev_t *)device;
+
+    /* 复位 Flash 到已知状态（适配远程 BSP 驱动的鲁棒初始化流程） */
+    flash_reset_device(dev);
 
     /* 读取 JEDEC ID */
     pl_qspi_command_t cmd = {
