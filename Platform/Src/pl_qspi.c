@@ -126,10 +126,10 @@ void pl_qspi_abort(pl_qspi_handle_t handle)
 void pl_qspi_init(void)
 {
     hqspi.Instance                = QUADSPI;
-    hqspi.Init.ClockPrescaler     = 0;
+    hqspi.Init.ClockPrescaler     = 1;    /* QSPI_CLK = 150MHz / 2 = 75MHz */
     hqspi.Init.FifoThreshold      = 4;
     hqspi.Init.SampleShifting     = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
-    hqspi.Init.FlashSize          = 23;    /* 2^23 = 8MB */
+    hqspi.Init.FlashSize          = 23;   /* 2^23 = 8MB, W25Q64 */
     hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_1_CYCLE;
     hqspi.Init.ClockMode          = QSPI_CLOCK_MODE_0;
     hqspi.Init.FlashID            = QSPI_FLASH_ID_1;
