@@ -182,6 +182,7 @@ targets:
       - <virtual_root>/Drivers/HAL_Driver/stm32h7xx_hal_timebase_rtc_alarm_template.c
       - <virtual_root>/Drivers/HAL_Driver/stm32h7xx_hal_timebase_rtc_wakeup_template.c
       - <virtual_root>/Drivers/HAL_Driver/stm32h7xx_hal_timebase_tim_template.c
+      - Core/Src/crc.c
     settings:
       debugger: cortex-debug
     toolchain: GCC
