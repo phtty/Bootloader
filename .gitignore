@@ -13,3 +13,25 @@
 # eide template
 *.ept
 *.eide-template
+
+# CMSIS files not needed for STM32H7 (Cortex-M7)
+/Drivers/CMSIS/Core_A/
+/Drivers/CMSIS/DAP/
+/Drivers/CMSIS/DSP/
+/Drivers/CMSIS/NN/
+/Drivers/CMSIS/docs/
+/Drivers/CMSIS/RTOS/
+/Drivers/CMSIS/RTOS2/
+/Drivers/CMSIS/st_readme.txt
+/Drivers/CMSIS/Core/Include/cachel1_armv7.h
+/Drivers/CMSIS/Core/Include/core_cm55.h
+/Drivers/CMSIS/Core/Include/core_cm85.h
+/Drivers/CMSIS/Core/Include/core_starmc1.h
+/Drivers/CMSIS/Core/Include/pac_armv81.h
+/Drivers/CMSIS/Core/Include/pmu_armv8.h
+/Drivers/CMSIS/Include/cachel1_armv7.h
+/Drivers/CMSIS/Include/core_cm55.h
+/Drivers/CMSIS/Include/core_cm85.h
+/Drivers/CMSIS/Include/core_starmc1.h
+/Drivers/CMSIS/Include/pac_armv81.h
+/Drivers/CMSIS/Include/pmu_armv8.h
